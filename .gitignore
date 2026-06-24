@@ -1,0 +1,52 @@
+# ───────────────────────── Dependencies ─────────────────────────
+node_modules/
+.pnpm-store/
+.turbo/
+
+# ───────────────────────── Build outputs ────────────────────────
+dist/
+build/
+out/
+*.tsbuildinfo
+coverage/
+.vite/
+
+# ───────────────────────── Env & secrets ────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+
+# ───────────────────────── Terraform ────────────────────────────
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.example.tfvars
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# Keep the dependency lock file under version control:
+!.terraform.lock.hcl
+
+# ───────────────────────── Kube / cloud creds ───────────────────
+kubeconfig
+*.kubeconfig
+.kube/
+
+# ───────────────────────── Logs & misc ──────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# ───────────────────────── OS ───────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ───────────────────────── Tooling / agents (requested) ─────────
+.claude/
+.agents/
+skills-lock.json
