@@ -24,7 +24,7 @@ variable "node_instance_type" {
 
 variable "node_desired_size" {
   type    = number
-  default = 2
+  default = 3 # 3 x t3.small: t3.small caps at 11 pods/node (ENI IP limit)
 }
 
 variable "node_min_size" {
