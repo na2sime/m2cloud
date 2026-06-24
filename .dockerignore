@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+**/.turbo
+.git
+.github
+.env
+.env.*
+!.env.example
+docs
+diagrams
+.claude
+.agents
+skills-lock.json
+infra/terraform/.terraform
+**/*.tsbuildinfo

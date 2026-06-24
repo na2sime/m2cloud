@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: app
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - gateway-api.yaml
+  - realtime.yaml
+  - worker.yaml
+  - web.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - ingress.yaml
+
+# Apply a common label WITHOUT mutating pod selectors (avoids the
+# commonLabels selector-immutability footgun on re-apply).
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: m2cloud
+    includeSelectors: false

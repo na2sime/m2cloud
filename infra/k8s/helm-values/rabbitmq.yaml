@@ -1,0 +1,19 @@
+# Bitnami RabbitMQ — single node, in-cluster, persistent (PVC → EBS gp3).
+# Release name MUST be "rabbitmq" so the service is "rabbitmq" (see RABBITMQ_URL).
+# Password is NOT in git: it is synced from AWS Secrets Manager by the
+# `rabbitmq-credentials` ExternalSecret (key rabbitmq-password).
+replicaCount: 1
+auth:
+  username: m2cloud
+  existingPasswordSecret: rabbitmq-credentials
+  existingSecretPasswordKey: rabbitmq-password
+persistence:
+  enabled: true
+  size: 1Gi
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

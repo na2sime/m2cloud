@@ -1,0 +1,34 @@
+# PodDisruptionBudgets keep at least one replica serving during voluntary
+# disruptions (node drains, rolling updates) — resilience.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gateway-api
+  namespace: app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: gateway-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: realtime
+  namespace: app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: realtime
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web
+  namespace: app
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: web

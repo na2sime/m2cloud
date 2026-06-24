@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: app
+data:
+  # Non-secret runtime configuration. Secrets (DATABASE_URL, JWT_SECRET,
+  # RABBITMQ_URL) come from the `app-secrets` Secret, synced by the
+  # External Secrets Operator from AWS Secrets Manager.
+  REDIS_URL: "redis://redis-master.app.svc.cluster.local:6379"
+  GATEWAY_PORT: "3000"
+  REALTIME_PORT: "3001"
+  WORKER_PORT: "3002"
+  LOG_LEVEL: "info"
