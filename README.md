@@ -77,7 +77,7 @@ Packages partagés du monorepo : `@m2cloud/shared` (logger JSON, config zod, con
 
 | Décision | Alternative écartée | Justification |
 |---|---|---|
-| **Kubernetes / EKS** | Serverless (Lambda + API Gateway) | Imposé ; les connexions WebSocket longues et les workers stateful s'orchestrent mal en serverless. EKS = scaling fin (HPA), portabilité, démonstration de la maîtrise infra. |
+| **Kubernetes / EKS** | Serverless (Lambda + API Gateway) | Les connexions WebSocket longues et les workers stateful s'orchestrent mal en serverless. EKS = scaling fin (HPA), portabilité, démonstration de la maîtrise infra. |
 | **RDS PostgreSQL + Drizzle** | Blob/S3, DynamoDB | Données fortement **relationnelles** (users/posts/comments/votes, unicité, jointures). S3 = objets non structurés, inadapté. Drizzle = ORM TypeScript typé + migrations versionnées. |
 | **Redis in-cluster** | ElastiCache | Cache + **pub/sub temps réel** ; en cluster = coût réduit et démontre **StatefulSet/PVC** (persistance K8s). |
 | **RabbitMQ in-cluster** | Amazon MQ / SQS | Découplage **event-driven** typé (exchange topic) ; en cluster = coût réduit + persistance PVC. SQS = vendor-lock et routage limité. |

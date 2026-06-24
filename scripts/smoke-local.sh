@@ -84,9 +84,9 @@ TOKEN="$TA" SLUG="$SLUG" node "$(dirname "$0")/ws-check.mjs" && note "ws join+se
 
 echo
 if [ "$fail" = "0" ]; then
-  echo "✅ SMOKE PASSED"
+  echo "SMOKE PASSED"
 else
-  echo "❌ SMOKE FAILED — server logs:"
+  echo "SMOKE FAILED — server logs:"
   echo "--- gateway ---"; tail -8 "$LOGDIR/gw.log"
   echo "--- realtime ---"; tail -8 "$LOGDIR/rt.log"
   echo "--- worker ---"; tail -8 "$LOGDIR/wk.log"
