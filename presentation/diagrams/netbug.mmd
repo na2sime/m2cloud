@@ -1,0 +1,19 @@
+flowchart LR
+  ING[ingress-nginx<br/><small>nœud A</small>]:::svc
+
+  subgraph N[" nœud B "]
+    GW[gateway-api<br/><small>:3000</small>]:::svc
+    WEB[web<br/><small>:80</small>]:::web
+  end
+
+  ING -->|":3000 ∈ 1025-65535"| GW
+  ING -. ":80 hors plage · BLOQUÉ" .-x WEB
+
+  SG{{Security Group nœuds EKS<br/><small>cross-node autorisé : 1025-65535</small>}}:::ember
+
+  SG -.-> N
+
+  classDef svc fill:#0b1a20,stroke:#5eead4,stroke-width:1.8px,color:#c7f9f1;
+  classDef web fill:#2a0f0f,stroke:#f87171,stroke-width:2px,color:#fecaca;
+  classDef ember fill:#241407,stroke:#ff8a3d,stroke-width:2px,color:#ffd9b8;
+  linkStyle 1 stroke:#f87171,stroke-width:2px;

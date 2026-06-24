@@ -1,0 +1,40 @@
+flowchart TB
+  U([Navigateur]):::ember
+
+  subgraph AWS[" AWS · VPC 10.0.0.0/16 · eu-west-1 "]
+    direction TB
+    NLB{{NLB · ingress-nginx}}:::ember
+
+    subgraph EKS[" EKS · namespace app "]
+      direction LR
+      WEB[web<br/><small>React / Vite</small>]:::svc
+      GW[gateway-api<br/><small>Fastify REST</small>]:::svc
+      RT[realtime<br/><small>WebSocket</small>]:::svc
+      WK[worker<br/><small>consumer</small>]:::svc
+      REDIS[(Redis<br/><small>StatefulSet · PVC</small>)]:::data
+      MQ[(RabbitMQ<br/><small>StatefulSet · PVC</small>)]:::data
+    end
+
+    RDS[(RDS PostgreSQL<br/><small>subnets privés</small>)]:::data
+    SM[[Secrets Manager]]:::ext
+  end
+
+  U ==> NLB
+  NLB -->|/| WEB
+  NLB -->|/api| GW
+  NLB -->|/ws| RT
+
+  GW -->|Drizzle| RDS
+  GW -->|cache · votes| REDIS
+  GW -->|publie events| MQ
+  RT <-->|pub/sub fan-out| REDIS
+  RT -->|messages| RDS
+  MQ -->|consume| WK
+  WK -->|notifications| RDS
+
+  SM -. ESO · IRSA .-> EKS
+
+  classDef ember fill:#241407,stroke:#ff8a3d,stroke-width:2px,color:#ffd9b8;
+  classDef svc fill:#0b1a20,stroke:#5eead4,stroke-width:1.8px,color:#c7f9f1;
+  classDef data fill:#121826,stroke:#8aa0bf,stroke-width:1.5px,color:#cdd8e8;
+  classDef ext fill:#0e1422,stroke:#64748b,stroke-width:1.4px,color:#9fb0c8;

@@ -1,0 +1,19 @@
+flowchart LR
+  DEV([git push]):::ember
+  subgraph CI[" ci.yml · PR/push "]
+    direction TB
+    T1[typecheck]:::svc --> T2[tests<br/><small>Postgres service</small>]:::svc --> T3[build]:::svc
+  end
+  subgraph CD[" cd.yml · main "]
+    direction TB
+    O[OIDC → AWS]:::ember --> B[build + push<br/>ECR]:::svc --> M[migration Job<br/><small>in-cluster</small>]:::data --> R[rollout EKS<br/><small>Kustomize</small>]:::svc
+  end
+  PROD([pods en prod]):::ember
+
+  DEV --> CI
+  CI --> CD
+  CD --> PROD
+
+  classDef ember fill:#241407,stroke:#ff8a3d,stroke-width:2px,color:#ffd9b8;
+  classDef svc fill:#0b1a20,stroke:#5eead4,stroke-width:1.8px,color:#c7f9f1;
+  classDef data fill:#121826,stroke:#8aa0bf,stroke-width:1.5px,color:#cdd8e8;
