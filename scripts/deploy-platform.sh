@@ -48,6 +48,17 @@ helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
   -n ingress-nginx --create-namespace \
   -f infra/k8s/helm-values/ingress-nginx.yaml --wait
 
+echo "== enable NLB cross-zone load balancing =="
+# The in-tree NLB doesn't reliably honor the cross-zone annotation when nodes
+# are added later, so set the attribute directly (idempotent).
+sleep 30
+NLB_ARN=$(aws elbv2 describe-load-balancers --query "LoadBalancers[?Type=='network']|[0].LoadBalancerArn" --output text 2>/dev/null || true)
+if [ -n "${NLB_ARN:-}" ] && [ "$NLB_ARN" != "None" ]; then
+  aws elbv2 modify-load-balancer-attributes --load-balancer-arn "$NLB_ARN" \
+    --attributes Key=load_balancing.cross_zone.enabled,Value=true >/dev/null 2>&1 \
+    && echo "cross-zone enabled" || echo "cross-zone: set manually if needed"
+fi
+
 echo
 echo "Platform ready. Now deploy the app:"
 echo "  - push to main (GitHub Actions CD), or"
