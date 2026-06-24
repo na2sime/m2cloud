@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: m2cloud
+          POSTGRES_PASSWORD: m2cloud
+          POSTGRES_DB: m2cloud
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U m2cloud"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      PGBASE: postgres://m2cloud:m2cloud@localhost:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Prepare test databases
+        env:
+          PGPASSWORD: m2cloud
+        run: |
+          for db in gateway realtime worker; do
+            psql -h localhost -U m2cloud -d m2cloud -c "CREATE DATABASE m2cloud_test_${db};"
+            DATABASE_URL="${PGBASE}/m2cloud_test_${db}" pnpm --filter @m2cloud/db migrate
+          done
+
+      - name: Test shared
+        run: pnpm --filter @m2cloud/shared test
+
+      - name: Test services
+        run: |
+          DATABASE_URL="${PGBASE}/m2cloud_test_gateway"  pnpm --filter @m2cloud/gateway-api test
+          DATABASE_URL="${PGBASE}/m2cloud_test_realtime" pnpm --filter @m2cloud/realtime test
+          DATABASE_URL="${PGBASE}/m2cloud_test_worker"   pnpm --filter @m2cloud/worker test
+
+      - name: Build web
+        run: pnpm --filter @m2cloud/web build

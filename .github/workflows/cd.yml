@@ -1,0 +1,104 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# OIDC: the job requests a short-lived token to assume the AWS role.
+# No static AWS access keys are stored in GitHub.
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+  CLUSTER_NAME: m2cloud
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push images
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          TAG: ${{ github.sha }}
+        run: |
+          for svc in gateway-api realtime worker; do
+            docker build -f docker/node-service.Dockerfile --build-arg SERVICE=$svc \
+              -t "$REGISTRY/m2cloud-$svc:$TAG" -t "$REGISTRY/m2cloud-$svc:latest" .
+            docker push "$REGISTRY/m2cloud-$svc:$TAG"
+            docker push "$REGISTRY/m2cloud-$svc:latest"
+          done
+          docker build -f docker/web.Dockerfile \
+            -t "$REGISTRY/m2cloud-web:$TAG" -t "$REGISTRY/m2cloud-web:latest" .
+          docker push "$REGISTRY/m2cloud-web:$TAG"
+          docker push "$REGISTRY/m2cloud-web:latest"
+
+      - name: Install kubectl & kustomize
+        run: |
+          curl -sLO "https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Configure kubectl
+        run: aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$AWS_REGION"
+
+      - name: Run DB migrations (Job)
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          TAG: ${{ github.sha }}
+        run: |
+          JOB="migrate-$(echo "$TAG" | cut -c1-8)"
+          kubectl -n app delete job "$JOB" --ignore-not-found
+          cat <<EOF | kubectl apply -f -
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: $JOB
+            namespace: app
+          spec:
+            backoffLimit: 2
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: migrate
+                    image: $REGISTRY/m2cloud-gateway-api:$TAG
+                    command: ["node", "dist/migrate.js"]
+                    env:
+                      - name: MIGRATIONS_DIR
+                        value: /app/migrations
+                    envFrom:
+                      - secretRef:
+                          name: app-secrets
+          EOF
+          kubectl -n app wait --for=condition=complete "job/$JOB" --timeout=180s
+
+      - name: Deploy to EKS
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          TAG: ${{ github.sha }}
+        run: |
+          cd infra/k8s/overlays/dev
+          for svc in gateway-api realtime worker web; do
+            kustomize edit set image "$svc=$REGISTRY/m2cloud-$svc:$TAG"
+          done
+          kubectl apply -k .
+          kubectl -n app rollout status deploy/gateway-api --timeout=180s
+          kubectl -n app rollout status deploy/realtime    --timeout=180s
+          kubectl -n app rollout status deploy/worker       --timeout=180s
+          kubectl -n app rollout status deploy/web          --timeout=180s
