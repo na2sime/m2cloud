@@ -33,6 +33,20 @@ module "eks" {
   tags = local.tags
 }
 
+# The EKS node security group only allows cross-node pod traffic on ports
+# 1025-65535 by default. The web service listens on port 80, so allow it
+# explicitly between nodes (otherwise the ingress can't reach web pods on
+# another node). (Live cluster also has this rule; added here for fresh deploys.)
+resource "aws_security_group_rule" "nodes_web_port_80" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = module.eks.node_security_group_id
+  source_security_group_id = module.eks.node_security_group_id
+  description              = "Cross-node pod traffic on port 80 (web service)"
+}
+
 # EBS CSI driver installed as a separate addon so its IRSA role (which depends
 # on the cluster's OIDC provider) does not create a module-level cycle.
 resource "aws_eks_addon" "ebs_csi" {

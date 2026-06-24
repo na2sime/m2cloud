@@ -9,6 +9,10 @@ jget() { python3 -c "import sys,json;print(json.load(sys.stdin)$1)"; }
 api() { curl -s --max-time 20 --retry 4 --retry-all-errors --retry-delay 1 "$BASE$1" "${@:2}"; }
 U="$RANDOM$RANDOM"
 
+echo "== frontend =="
+WEBCODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 --retry 4 --retry-all-errors --retry-delay 1 "$BASE/")
+[ "$WEBCODE" = "200" ] && note "GET / (web SPA)" "OK" || { note "web" "FAIL ($WEBCODE)"; fail=1; }
+
 echo "== REST flow against $BASE =="
 RA=$(api /api/auth/register -H 'content-type: application/json' \
   -d "{\"email\":\"a$U@t.io\",\"username\":\"a$U\",\"password\":\"pw123456\"}")

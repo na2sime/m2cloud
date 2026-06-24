@@ -15,6 +15,13 @@ spec:
       labels:
         app: worker
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: worker
       containers:
         - name: worker
           image: worker # overridden by kustomize

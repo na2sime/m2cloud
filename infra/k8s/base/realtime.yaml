@@ -15,6 +15,13 @@ spec:
       labels:
         app: realtime
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: realtime
       containers:
         - name: realtime
           image: realtime # overridden by kustomize

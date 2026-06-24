@@ -15,6 +15,15 @@ spec:
       labels:
         app: web
     spec:
+      # Spread replicas across nodes so a single bad node can't take down the
+      # whole service (best-effort: won't block scheduling).
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: web
       containers:
         - name: web
           image: web # overridden by kustomize

@@ -15,6 +15,13 @@ spec:
       labels:
         app: gateway-api
     spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: gateway-api
       containers:
         - name: gateway-api
           image: gateway-api # overridden by kustomize (registry/tag)
