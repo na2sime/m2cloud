@@ -50,3 +50,7 @@ Thumbs.db
 .claude/
 .agents/
 skills-lock.json
+
+# Internal working notes (brainstorming specs, etc.) — kept local only.
+# Graded deliverables live in README.md and diagrams/ (top-level), not here.
+docs/
