@@ -13,7 +13,8 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @m2cloud/${SERVICE} build
 # Produce a self-contained deploy dir: dist/ + a production node_modules.
-RUN pnpm --filter @m2cloud/${SERVICE} deploy --prod /prod
+# --legacy is required by pnpm v10 to deploy non-injected workspaces.
+RUN pnpm --filter @m2cloud/${SERVICE} deploy --prod --legacy /prod
 
 FROM node:${NODE_VERSION} AS runtime
 ENV NODE_ENV=production
@@ -21,6 +22,8 @@ WORKDIR /app
 RUN addgroup -S app && adduser -S app -G app
 COPY --from=build --chown=app:app /prod/dist ./dist
 COPY --from=build --chown=app:app /prod/node_modules ./node_modules
+# Migration SQL (used by the gateway-api `node dist/migrate.js` job).
+COPY --from=build --chown=app:app /repo/packages/db/migrations ./migrations
 USER app
 EXPOSE 3000 3001 3002
 CMD ["node", "dist/index.js"]
