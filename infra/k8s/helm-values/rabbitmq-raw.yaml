@@ -39,18 +39,27 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/rabbitmq
-          readinessProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
+          # rabbitmq-diagnostics spawns an Erlang node and is too slow/heavy on
+          # small nodes (times out > 5s). A TCP check on the AMQP port is fast
+          # and reliable. A startupProbe gives the broker ample time to boot.
+          startupProbe:
+            tcpSocket:
+              port: 5672
             initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            tcpSocket:
+              port: 5672
             periodSeconds: 10
             timeoutSeconds: 5
           livenessProbe:
-            exec:
-              command: ["rabbitmq-diagnostics", "-q", "ping"]
-            initialDelaySeconds: 40
+            tcpSocket:
+              port: 5672
+            initialDelaySeconds: 60
             periodSeconds: 20
             timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             requests:
               cpu: 100m
