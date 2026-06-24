@@ -7,9 +7,11 @@ RUN corepack enable
 WORKDIR /repo
 COPY . .
 RUN pnpm install --frozen-lockfile
-# In the cluster the ingress serves /api and /ws on the same origin, so the
-# SPA talks to relative paths. The ws client upgrades these to absolute URLs.
-ARG VITE_API_URL=/api
+# In the cluster the ingress serves /api and /ws on the SAME origin as the web.
+# The api client paths already include "/api" (e.g. /api/auth/register), so the
+# API base must be EMPTY (origin-relative) — otherwise URLs double to /api/api.
+# The ws client turns the path-only "/ws" into an absolute ws(s):// URL.
+ARG VITE_API_URL=""
 ARG VITE_WS_URL=/ws
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_WS_URL=${VITE_WS_URL}
