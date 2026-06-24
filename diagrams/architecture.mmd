@@ -1,0 +1,43 @@
+%% m2cloud / Hearth — global architecture.
+%% Render: https://mermaid.live  or  `mmdc -i architecture.mmd -o architecture.png`
+flowchart TB
+    U([Navigateur])
+
+    subgraph AWS["AWS — VPC 10.0.0.0/16 (2 AZ)"]
+        subgraph PUB["Subnets publics"]
+            NLB[["NLB (ingress-nginx)"]]
+        end
+
+        subgraph EKS["EKS — namespace app (subnets privés)"]
+            WEB["web<br/>(React/Vite + Nginx)"]
+            GW["gateway-api<br/>(Fastify REST)"]
+            RT["realtime<br/>(WebSocket)"]
+            WK["worker<br/>(consumer)"]
+            REDIS[("Redis<br/>StatefulSet + PVC")]
+            MQ[("RabbitMQ<br/>StatefulSet + PVC")]
+        end
+
+        RDS[("RDS PostgreSQL<br/>subnets privés")]
+        SM[["Secrets Manager"]]
+        ECR[["ECR"]]
+    end
+
+    GH["GitHub Actions"]
+
+    U -->|HTTPS| NLB
+    NLB -->|/| WEB
+    NLB -->|/api| GW
+    NLB -->|/ws| RT
+
+    GW -->|Drizzle| RDS
+    GW -->|cache + compteurs| REDIS
+    GW -->|publie events| MQ
+    RT <-->|pub/sub fan-out| REDIS
+    RT -->|messages| RDS
+    MQ -->|comment.created| WK
+    WK -->|notifications| RDS
+    WK -->|invalide cache| REDIS
+
+    SM -. "External Secrets Operator (IRSA)" .-> EKS
+    GH -. "OIDC (sans clé statique)" .-> ECR
+    GH -. "OIDC" .-> EKS
