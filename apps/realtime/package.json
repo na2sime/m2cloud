@@ -1,0 +1,24 @@
+{
+  "name": "@m2cloud/realtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@m2cloud/db": "workspace:*",
+    "@m2cloud/shared": "workspace:*",
+    "drizzle-orm": "^0.38.3",
+    "ioredis": "^5.4.2",
+    "postgres": "^3.4.5",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.13"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@m2cloud/gateway-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@m2cloud/db": "workspace:*",
+    "@m2cloud/shared": "workspace:*",
+    "amqplib": "^0.10.5",
+    "bcryptjs": "^2.4.3",
+    "drizzle-orm": "^0.38.3",
+    "fastify": "^5.2.0",
+    "ioredis": "^5.4.2",
+    "postgres": "^3.4.5",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.6",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}
