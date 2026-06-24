@@ -1,11 +1,14 @@
 # Bitnami Redis — standalone, in-cluster, persistent (PVC → EBS gp3).
 # Release name MUST be "redis" so the service is "redis-master" (see app-config).
 architecture: standalone
+global:
+  storageClass: gp3
 auth:
   enabled: false # in-cluster only, never exposed outside the VPC
 master:
   persistence:
     enabled: true
+    storageClass: gp3
     size: 1Gi
   resources:
     requests:

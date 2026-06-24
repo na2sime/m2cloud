@@ -1,0 +1,16 @@
+# Default StorageClass backed by the EBS CSI driver (gp3). EKS 1.31 no longer
+# ships a usable default (the in-tree aws-ebs provisioner was removed), so PVCs
+# for Redis/RabbitMQ need this.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  encrypted: "true"
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Delete
+allowVolumeExpansion: true

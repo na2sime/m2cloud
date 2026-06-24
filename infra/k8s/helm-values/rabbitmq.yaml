@@ -9,6 +9,7 @@ auth:
   existingSecretPasswordKey: rabbitmq-password
 persistence:
   enabled: true
+  storageClass: gp3
   size: 1Gi
 resources:
   requests:

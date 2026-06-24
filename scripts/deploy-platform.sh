@@ -18,6 +18,9 @@ helm repo update >/dev/null
 
 kubectl create namespace app --dry-run=client -o yaml | kubectl apply -f -
 
+echo "== default StorageClass (gp3, EBS CSI) =="
+kubectl apply -f infra/k8s/helm-values/storageclass.yaml
+
 echo "== External Secrets Operator (IRSA, no static keys) =="
 helm upgrade --install external-secrets external-secrets/external-secrets \
   -n external-secrets --create-namespace \
