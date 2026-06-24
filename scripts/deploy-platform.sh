@@ -33,11 +33,15 @@ kubectl apply -f infra/k8s/helm-values/secret-store.yaml
 kubectl -n app wait --for=condition=Ready externalsecret/app-secrets --timeout=120s
 kubectl -n app wait --for=condition=Ready externalsecret/rabbitmq-credentials --timeout=120s
 
-echo "== Redis + RabbitMQ (StatefulSets + PVC) =="
+echo "== Redis (StatefulSet + PVC) =="
 helm upgrade --install redis bitnami/redis -n app \
   -f infra/k8s/helm-values/redis.yaml --wait
-helm upgrade --install rabbitmq bitnami/rabbitmq -n app \
-  -f infra/k8s/helm-values/rabbitmq.yaml --wait
+
+echo "== RabbitMQ (StatefulSet + PVC, official image) =="
+# NB: the Bitnami RabbitMQ chart's pinned image tag was removed from the public
+# registry in 2025, so we deploy the official rabbitmq image directly.
+kubectl apply -f infra/k8s/helm-values/rabbitmq-raw.yaml
+kubectl -n app rollout status statefulset/rabbitmq --timeout=240s
 
 echo "== ingress-nginx (NLB) =="
 helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
