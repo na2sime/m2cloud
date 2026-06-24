@@ -18,6 +18,8 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Skip cleanly until the OIDC role variable is configured (post terraform apply).
+    if: ${{ vars.AWS_ROLE_ARN != '' }}
     steps:
       - uses: actions/checkout@v4
 
