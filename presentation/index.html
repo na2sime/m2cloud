@@ -137,15 +137,15 @@
       <div class="sub">Une plateforme de discussion temps réel, en microservices, déployée sur AWS&nbsp;EKS.</div>
       <div class="stack">PostgreSQL · Redis · RabbitMQ · Kubernetes · Terraform · GitHub Actions</div>
     </div>
-    <div class="by">na2sime · github.com/na2sime/m2cloud</div>
+    <div class="by">Nassime ABDIOU · github.com/na2sime/m2cloud</div>
   </section>
 
   <!-- 02 BRIEF -->
   <section>
     <div class="eyebrow"><span class="n">02</span> · Le brief</div>
-    <h1 class="title">Les contraintes, sans triche</h1>
+    <h1 class="title">Les contraintes</h1>
     <div class="grid4">
-      <div class="card"><span class="tag">data</span><h3>PostgreSQL · Redis · RabbitMQ</h3><p>Trois briques imposées — chacune justifiée par un besoin réel.</p></div>
+      <div class="card"><span class="tag">data</span><h3>PostgreSQL · Redis · RabbitMQ</h3><p>Trois briques — chacune justifiée par un besoin réel.</p></div>
       <div class="card"><span class="tag">compute</span><h3>Kubernetes obligatoire</h3><p>De l'orchestration, pas un simple conteneur isolé.</p></div>
       <div class="card"><span class="tag">delivery</span><h3>IaC + CI/CD GitHub</h3><p>Tout reproductible, du commit au pod.</p></div>
       <div class="card"><span class="tag">repo</span><h3>Monorepo</h3><p>Contrats typés partagés entre les services.</p></div>
@@ -177,7 +177,7 @@
   <!-- 05 CHOIX TECHNIQUES -->
   <section>
     <div class="eyebrow"><span class="n">05</span> · Justifications</div>
-    <h1 class="title">Choix techniques justifiés</h1>
+    <h1 class="title">Choix techniques</h1>
     <div class="grid2" style="align-items:start">
       <div>
         <p class="note" style="margin:0 0 12px"><b style="color:var(--ink);font-weight:500">Compute</b> — EKS vs serverless</p>
@@ -188,7 +188,7 @@
         </div>
       </div>
       <div>
-        <p class="note" style="margin:0 0 12px"><b style="color:var(--ink);font-weight:500">Données</b> — relationnel assumé</p>
+        <p class="note" style="margin:0 0 12px"><b style="color:var(--ink);font-weight:500">Données</b> — relationnel</p>
         <div class="card" style="margin-bottom:14px"><h3>RDS Postgres + Drizzle</h3><p>Données relationnelles (unicité, jointures). Drizzle &gt; Prisma : léger, SQL explicite, <b style="color:var(--accent-2)">pas de binaire</b> embarqué.</p></div>
         <div class="card"><h3>Redis &amp; RabbitMQ in-cluster</h3><p>Coût ↓ et démonstration de la persistance K8s (StatefulSet + PVC).</p></div>
       </div>
