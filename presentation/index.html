@@ -6,249 +6,200 @@
 <title>m2cloud · Hearth — soutenance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <style>
   :root{
-    --bg:#0a111e; --bg2:#0d1626; --panel:#101c30; --panel2:#0c1626;
-    --line:#1c2a42; --line2:#243650;
-    --ink:#e7eef8; --mut:#8ba0bf; --dim:#5f718d;
-    --ember:#ff8a3d; --ember-2:#ffb27a; --ember-deep:#cf6a2a;
-    --teal:#5eead4; --teal-2:#9af2e4;
-    --red:#f87171;
+    --bg:#0d1117; --panel:#141a22; --panel2:#11161d;
+    --line:#222b36; --line2:#2b3543;
+    --ink:#e6edf3; --mut:#92a0b0; --dim:#647284;
+    --accent:#7fb0cc; --accent-2:#a8cbe0; --accent-soft:rgba(127,176,204,.08);
+    --warn:#b09a5e; --bad:#bd8080;
     --mono:'IBM Plex Mono',ui-monospace,monospace;
     --sans:'IBM Plex Sans',system-ui,sans-serif;
     --disp:'Space Grotesk',var(--sans);
   }
-  html,body{background:var(--bg);}
+  :root{ --r-background-color:#0d1117; }
+  html,body{ background:var(--bg); }
+  .reveal-viewport{ background-color:var(--bg); }
   .reveal{ font-family:var(--sans); color:var(--ink); font-weight:300; }
-  .reveal ::selection{ background:rgba(255,138,61,.3); }
-
-  /* layered atmosphere: base gradient + faint grid + ember/teal glows */
-  .bg-layer{ position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:
-      radial-gradient(900px 600px at 12% 8%, rgba(255,138,61,.10), transparent 60%),
-      radial-gradient(900px 700px at 92% 96%, rgba(94,234,212,.07), transparent 60%),
-      linear-gradient(180deg,#0a111e,#0b1424 60%,#091020);
-  }
-  .bg-grid{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.35;
-    background-image:linear-gradient(rgba(120,150,190,.05) 1px,transparent 1px),
-      linear-gradient(90deg,rgba(120,150,190,.05) 1px,transparent 1px);
-    background-size:46px 46px; mask-image:radial-gradient(circle at 50% 40%,#000,transparent 92%); }
+  .reveal ::selection{ background:rgba(127,176,204,.22); }
 
   .reveal .slides{ text-align:left; }
-  .reveal .slides section{ height:100%; padding:54px 70px 92px; box-sizing:border-box;
+  .reveal .slides section{ height:100%; padding:60px 78px 70px; box-sizing:border-box;
     display:flex; flex-direction:column; justify-content:flex-start; }
 
-  /* eyebrow terminal prompt */
-  .eyebrow{ font-family:var(--mono); font-size:18px; letter-spacing:.02em; margin:0 0 22px;
-    color:var(--mut); display:flex; align-items:center; gap:.55ch; }
-  .eyebrow .u{ color:var(--teal); } .eyebrow .h{ color:var(--mut); }
-  .eyebrow .p{ color:var(--ember-2); } .eyebrow .d{ color:var(--ember); }
-  .eyebrow .cmd{ color:var(--ink); }
-  .eyebrow .cur{ width:9px; height:1.05em; background:var(--ember); display:inline-block;
-    margin-left:.2ch; transform:translateY(2px); animation:blink 1.1s step-end infinite; }
-  @keyframes blink{ 50%{opacity:0} }
+  /* quiet eyebrow: section number + label */
+  .eyebrow{ font-family:var(--mono); font-size:15px; letter-spacing:.05em; color:var(--dim);
+    margin:0 0 26px; text-transform:uppercase; }
+  .eyebrow .n{ color:var(--accent); }
 
-  h1.title{ font-family:var(--disp); font-weight:600; font-size:54px; line-height:1.04;
-    letter-spacing:-.02em; margin:.1em 0 .35em; color:var(--ink); }
-  h1.title .ac{ color:var(--ember); }
-  .lead{ font-size:23px; color:var(--mut); max-width:23ch; font-weight:300; }
+  h1.title{ font-family:var(--disp); font-weight:500; font-size:46px; line-height:1.1;
+    letter-spacing:-.015em; margin:0 0 28px; color:var(--ink); }
+  h1.title .ac{ color:var(--accent); }
   .reveal p{ font-weight:300; }
+  .note{ color:var(--mut); font-size:18px; line-height:1.5; }
 
-  /* the persistent ops status bar (tmux-like) */
-  .statusbar{ position:fixed; left:0; right:0; bottom:0; z-index:40; height:40px;
-    display:flex; align-items:stretch; font-family:var(--mono); font-size:14.5px;
-    background:linear-gradient(180deg,#0c1525,#0a1120); border-top:1px solid var(--line2); }
-  .statusbar .seg{ display:flex; align-items:center; gap:.6ch; padding:0 16px; color:var(--mut);
-    border-right:1px solid var(--line); }
-  .statusbar .seg.brand{ color:var(--ink); font-weight:600; letter-spacing:.04em; }
-  .statusbar .dot{ width:8px; height:8px; border-radius:50%; box-shadow:0 0 10px currentColor; }
-  .statusbar .dot.live{ color:var(--ember); background:var(--ember); animation:pulse 2.4s ease-in-out infinite; }
-  .statusbar .dot.ok{ color:var(--teal); background:var(--teal); }
-  .statusbar .grow{ flex:1; }
-  .statusbar .seg.page{ color:var(--ink); border-right:none; border-left:1px solid var(--line); }
-  .statusbar .seg .k{ color:var(--teal); }
-  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.35} }
+  /* footer */
+  .footer{ position:fixed; left:0; right:0; bottom:0; height:34px; z-index:30;
+    display:flex; align-items:center; justify-content:space-between; padding:0 34px;
+    font-family:var(--mono); font-size:13px; color:var(--dim); border-top:1px solid var(--line);
+    background:var(--bg); }
+  .footer .l{ letter-spacing:.08em; }
+  .footer .r{ color:var(--mut); }
 
-  /* generic bits */
-  .mono{ font-family:var(--mono); }
-  .chips{ display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
-  .chip{ font-family:var(--mono); font-size:15px; color:var(--teal-2); padding:7px 13px;
-    border:1px solid var(--line2); border-radius:7px; background:rgba(94,234,212,.04); }
-  .callout{ margin-top:auto; font-family:var(--mono); font-size:18px; color:var(--ember-2);
-    border-left:2px solid var(--ember); padding:10px 0 10px 16px; background:linear-gradient(90deg,rgba(255,138,61,.06),transparent); }
-  .note{ color:var(--mut); font-size:17px; }
-
-  /* grids & cards */
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px; }
-  .grid4{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px; }
-  .card{ border:1px solid var(--line2); border-radius:12px; padding:16px 18px; background:var(--panel);
-    border-left:3px solid var(--teal); }
-  .card.amber{ border-left-color:var(--ember); }
-  .card h3{ font-family:var(--mono); font-size:18px; margin:0 0 6px; color:var(--ink); font-weight:600; }
-  .card p{ font-size:16px; color:var(--mut); margin:0; }
-  .card .tag{ font-family:var(--mono); font-size:12.5px; color:var(--teal); text-transform:uppercase;
-    letter-spacing:.08em; }
-  .card.amber .tag{ color:var(--ember-2); }
+  /* cards */
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .grid4{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .card{ border:1px solid var(--line2); border-radius:10px; padding:18px 20px; background:var(--panel); }
+  .card .tag{ font-family:var(--mono); font-size:12px; color:var(--accent); text-transform:uppercase;
+    letter-spacing:.09em; }
+  .card h3{ font-family:var(--mono); font-size:18px; margin:7px 0 6px; color:var(--ink); font-weight:500; }
+  .card p{ font-size:16px; color:var(--mut); margin:0; line-height:1.45; }
 
   /* comparison rows */
-  .rows{ display:flex; flex-direction:column; gap:12px; margin-top:6px; }
-  .row{ display:grid; grid-template-columns:200px 1fr; align-items:center; gap:18px;
-    border:1px solid var(--line); border-radius:10px; padding:13px 16px; background:var(--panel2); }
-  .row .opt{ font-family:var(--mono); font-size:18px; color:var(--ink); }
-  .row .why{ font-size:16.5px; color:var(--mut); }
-  .row.no{ border-left:3px solid var(--red); } .row.no .opt{ color:#fca5a5; }
-  .row.meh{ border-left:3px solid #eab308; }
-  .row.yes{ border-left:3px solid var(--teal); } .row.yes .opt{ color:var(--teal-2); }
+  .rows{ display:flex; flex-direction:column; gap:11px; }
+  .row{ display:grid; grid-template-columns:150px 1fr; align-items:center; gap:18px;
+    border:1px solid var(--line); border-left:2px solid var(--line2); border-radius:9px;
+    padding:13px 18px; background:var(--panel2); }
+  .row .opt{ font-family:var(--mono); font-size:17px; color:var(--ink); }
+  .row .why{ font-size:16px; color:var(--mut); line-height:1.4; }
+  .row.no{ border-left-color:var(--bad); } .row.no .opt{ color:#caa0a0; }
+  .row.meh{ border-left-color:var(--warn); }
+  .row.yes{ border-left-color:var(--accent); } .row.yes .opt{ color:var(--accent-2); }
 
-  /* diagram frame */
-  .figure{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; margin-top:4px; }
-  .figure img{ max-width:100%; max-height:430px; filter:drop-shadow(0 18px 40px rgba(0,0,0,.5)); }
-  .figcap{ font-family:var(--mono); font-size:15px; color:var(--mut); margin-top:8px; }
+  /* quote / callout — restrained */
+  .callout{ margin-top:auto; font-size:18px; color:var(--mut); border-left:2px solid var(--accent);
+    padding:6px 0 6px 18px; line-height:1.5; }
+  .callout b{ color:var(--ink); font-weight:500; }
 
-  /* diagram-hero slides: compact header so the figure gets more room */
-  .dgram{ padding-top:40px !important; padding-bottom:78px !important; }
-  .dgram .eyebrow{ margin-bottom:12px; }
-  .dgram h1.title{ font-size:38px; margin:.05em 0 .2em; }
-  .dgram .figure img{ max-height:505px; }
+  /* diagram */
+  .figure{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; }
+  .figure img{ max-width:100%; max-height:430px; }
+  .figcap{ font-family:var(--mono); font-size:14px; color:var(--dim); margin-top:14px; letter-spacing:.02em; }
+  .dgram{ padding-top:44px; padding-bottom:58px; }
+  .dgram h1.title{ font-size:38px; margin-bottom:16px; }
+  .dgram .figure img{ max-height:490px; }
 
   /* code */
-  pre.code{ font-family:var(--mono); font-size:16.5px; line-height:1.55; background:var(--panel2);
-    border:1px solid var(--line2); border-left:3px solid var(--ember); border-radius:10px;
-    padding:16px 20px; color:#cdd9ec; margin:6px 0 0; overflow:hidden; }
-  .code .c{ color:#5f718d; } .code .k{ color:var(--ember-2); } .code .s{ color:var(--teal-2); }
-  .code .n{ color:#e7eef8; }
+  pre.code{ font-family:var(--mono); font-size:16px; line-height:1.6; background:var(--panel2);
+    border:1px solid var(--line2); border-radius:10px; padding:18px 22px; color:#c4d0de; margin:0; }
+  .code .c{ color:#5f6b7a; } .code .k{ color:var(--accent-2); } .code .s{ color:#9db89a; }
 
-  /* REX table */
-  .rex{ display:flex; flex-direction:column; gap:10px; margin-top:4px; }
-  .rexrow{ display:grid; grid-template-columns:1.15fr 1fr .9fr; gap:14px; align-items:center;
-    border:1px solid var(--line); border-radius:10px; padding:11px 15px; background:var(--panel2); }
-  .rexrow .sym{ color:#fca5a5; font-size:16px; }
-  .rexrow .cau{ color:var(--mut); font-size:15.5px; }
-  .rexrow .fix{ font-family:var(--mono); color:var(--teal-2); font-size:14.5px; }
+  /* REX rows */
+  .rex{ display:flex; flex-direction:column; gap:10px; }
+  .rexrow{ display:grid; grid-template-columns:1.1fr 1fr .9fr; gap:16px; align-items:center;
+    border:1px solid var(--line); border-radius:9px; padding:12px 16px; background:var(--panel2); }
+  .rexrow .sym{ color:#caa0a0; font-size:15.5px; }
+  .rexrow .cau{ color:var(--mut); font-size:15px; }
+  .rexrow .fix{ font-family:var(--mono); color:var(--accent-2); font-size:14px; }
 
   /* steps */
-  .steps{ display:flex; flex-direction:column; gap:11px; margin-top:6px; }
-  .step{ display:flex; gap:14px; align-items:baseline; font-size:17.5px; color:var(--ink); }
-  .step .n{ font-family:var(--mono); color:var(--ember); font-size:15px; min-width:2.4ch; }
+  .steps{ display:flex; flex-direction:column; gap:14px; }
+  .step{ font-size:17px; color:var(--ink); line-height:1.4; }
+  .step .n{ font-family:var(--mono); color:var(--accent); font-size:14px; margin-right:12px; }
   .step .m{ color:var(--mut); }
 
-  /* lists */
-  ul.clean{ list-style:none; padding:0; margin:8px 0 0; display:flex; flex-direction:column; gap:13px; }
-  ul.clean li{ font-size:18.5px; padding-left:26px; position:relative; color:var(--ink); }
-  ul.clean li::before{ content:'▸'; position:absolute; left:0; color:var(--ember); }
-  ul.clean li b{ color:var(--teal-2); font-weight:500; }
+  ul.clean{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:16px; }
+  ul.clean li{ font-size:18px; padding-left:24px; position:relative; color:var(--ink); line-height:1.45; }
+  ul.clean li::before{ content:'—'; position:absolute; left:0; color:var(--accent); }
+  ul.clean li b{ color:var(--accent-2); font-weight:500; }
+
+  .stack{ font-family:var(--mono); font-size:15px; color:var(--mut); margin-top:22px; letter-spacing:.02em; }
 
   /* cover */
   .cover{ justify-content:center; }
-  .cover .kicker{ font-family:var(--mono); color:var(--teal); letter-spacing:.18em; font-size:16px;
-    text-transform:uppercase; margin-bottom:10px; }
-  .cover .word{ font-family:var(--disp); font-weight:700; font-size:120px; line-height:.92;
-    letter-spacing:-.03em; color:var(--ink); position:relative; }
-  .cover .word .flame{ color:var(--ember); text-shadow:0 0 60px rgba(255,138,61,.5); }
-  .cover .sub{ font-size:24px; color:var(--mut); margin-top:14px; max-width:30ch; font-weight:300; }
-  .cover .runline{ font-family:var(--mono); font-size:16px; color:var(--mut); margin-top:26px; }
-  .cover .runline .ok{ color:var(--teal); }
-  .cover .by{ position:absolute; bottom:96px; left:70px; font-family:var(--mono); font-size:15px; color:var(--dim); }
+  .cover .kicker{ font-family:var(--mono); color:var(--accent); letter-spacing:.16em; font-size:14px;
+    text-transform:uppercase; margin-bottom:18px; }
+  .cover .word{ font-family:var(--disp); font-weight:600; font-size:92px; line-height:1;
+    letter-spacing:-.025em; color:var(--ink); }
+  .cover .word .dot{ color:var(--accent); }
+  .cover .sub{ font-size:22px; color:var(--mut); margin-top:18px; max-width:34ch; font-weight:300; line-height:1.4; }
+  .cover .by{ margin-top:44px; font-family:var(--mono); font-size:14px; color:var(--dim); }
 
-  /* section divider */
-  .divider{ justify-content:center; }
-  .divider .big{ font-family:var(--disp); font-weight:700; font-size:64px; letter-spacing:-.02em; color:var(--ink); }
-  .divider .big .ac{ color:var(--ember); }
-  .divider .pre{ font-family:var(--mono); color:var(--mut); font-size:19px; margin-bottom:14px; }
+  .end .word{ font-size:64px; }
+  .end .sub{ margin-top:14px; }
 
-  .reveal .progress{ color:var(--ember); height:3px; }
-  .reveal .slide-number{ display:none; }
+  .reveal .progress{ color:var(--accent); height:2px; }
 
-  @media (prefers-reduced-motion: reduce){
-    .statusbar .dot.live{ animation:none } .eyebrow .cur{ animation:none }
-  }
+  @media (prefers-reduced-motion: reduce){ .reveal .slides section{ transition:none !important; } }
 </style>
 </head>
 <body>
-<div class="bg-layer"></div>
-<div class="bg-grid"></div>
 
 <div class="reveal"><div class="slides">
 
   <!-- 01 COVER -->
-  <section data-bg>
+  <section>
     <div class="cover">
       <div class="kicker">M2 Cloud · Architecture &amp; Déploiement</div>
-      <div class="word">HEAR<span class="flame">TH</span></div>
+      <div class="word">Hearth<span class="dot">.</span></div>
       <div class="sub">Une plateforme de discussion temps réel, en microservices, déployée sur AWS&nbsp;EKS.</div>
-      <div class="runline">$ curl http://…elb.eu-west-1.amazonaws.com/  →  <span class="ok">● 200 OK</span></div>
-      <div class="chips">
-        <span class="chip">postgres</span><span class="chip">redis</span><span class="chip">rabbitmq</span>
-        <span class="chip">kubernetes</span><span class="chip">terraform</span><span class="chip">github-actions</span>
-      </div>
+      <div class="stack">PostgreSQL · Redis · RabbitMQ · Kubernetes · Terraform · GitHub Actions</div>
     </div>
     <div class="by">na2sime · github.com/na2sime/m2cloud</div>
   </section>
 
   <!-- 02 BRIEF -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">brief</span> $ <span class="cmd">cat contraintes.txt</span><span class="cur"></span></div>
-    <h1 class="title">Le brief, sans triche</h1>
-    <div class="grid4" style="margin-top:18px">
-      <div class="card"><span class="tag">data</span><h3>PostgreSQL · Redis · RabbitMQ</h3><p>Les trois briques imposées — chacune justifiée par un besoin réel.</p></div>
-      <div class="card amber"><span class="tag">compute</span><h3>Kubernetes obligatoire</h3><p>Orchestration, pas un simple <span class="mono">docker run</span>.</p></div>
-      <div class="card"><span class="tag">delivery</span><h3>IaC + CI/CD GitHub</h3><p>Tout reproductible, automatisé du commit au pod.</p></div>
-      <div class="card amber"><span class="tag">repo</span><h3>Monorepo</h3><p>Contrats typés partagés entre services.</p></div>
+    <div class="eyebrow"><span class="n">02</span> · Le brief</div>
+    <h1 class="title">Les contraintes, sans triche</h1>
+    <div class="grid4">
+      <div class="card"><span class="tag">data</span><h3>PostgreSQL · Redis · RabbitMQ</h3><p>Trois briques imposées — chacune justifiée par un besoin réel.</p></div>
+      <div class="card"><span class="tag">compute</span><h3>Kubernetes obligatoire</h3><p>De l'orchestration, pas un simple conteneur isolé.</p></div>
+      <div class="card"><span class="tag">delivery</span><h3>IaC + CI/CD GitHub</h3><p>Tout reproductible, du commit au pod.</p></div>
+      <div class="card"><span class="tag">repo</span><h3>Monorepo</h3><p>Contrats typés partagés entre les services.</p></div>
     </div>
-    <div class="callout">Pas une démo locale — du cloud réel : déployé, sécurisé, automatisé, en une itération.</div>
+    <div class="callout">Pas une démo locale — du cloud <b>réel</b> : déployé, sécurisé, automatisé.</div>
   </section>
 
   <!-- 03 ARCHITECTURE -->
   <section class="dgram">
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">architecture</span> $ <span class="cmd">describe --all</span><span class="cur"></span></div>
+    <div class="eyebrow"><span class="n">03</span> · Architecture</div>
     <h1 class="title">Vue d'ensemble</h1>
     <div class="figure"><img src="diagrams/architecture.svg" alt="Architecture globale"></div>
-    <div class="figcap">NLB → ingress · 3 backends + 1 front · données relationnelles managées · découplage event-driven</div>
+    <div class="figcap">NLB → ingress · 3 backends + 1 front · données managées · découplage event-driven</div>
   </section>
 
   <!-- 04 SERVICES -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">services</span> $ <span class="cmd">why 4</span><span class="cur"></span></div>
+    <div class="eyebrow"><span class="n">04</span> · Découpage</div>
     <h1 class="title">Pourquoi <span class="ac">4</span> services</h1>
-    <div class="grid4" style="margin-top:14px">
-      <div class="card amber"><span class="tag">HPA · CPU</span><h3>gateway-api</h3><p>REST, auth JWT, écrit la DB, publie les events. Encaisse les rafales HTTP.</p></div>
-      <div class="card"><span class="tag">connexions longues</span><h3>realtime</h3><p>WebSocket, fan-out Redis pub/sub entre réplicas.</p></div>
+    <div class="grid4">
+      <div class="card"><span class="tag">HPA · CPU</span><h3>gateway-api</h3><p>REST, auth JWT, écrit la DB, publie les events. Rafales HTTP.</p></div>
+      <div class="card"><span class="tag">connexions longues</span><h3>realtime</h3><p>WebSocket, fan-out Redis pub/sub.</p></div>
       <div class="card"><span class="tag">profondeur de queue</span><h3>worker</h3><p>Consomme RabbitMQ → notifications, en asynchrone.</p></div>
-      <div class="card amber"><span class="tag">trafic lecture</span><h3>web</h3><p>SPA React/Vite servie en statique.</p></div>
+      <div class="card"><span class="tag">trafic lecture</span><h3>web</h3><p>SPA React/Vite servie en statique.</p></div>
     </div>
-    <div class="callout">3 profils de charge incompatibles dans un même process → la vraie raison du microservice.</div>
+    <div class="callout">Trois profils de charge incompatibles dans un même process — <b>la vraie raison du microservice.</b></div>
   </section>
 
-  <!-- 05 COMPUTE -->
+  <!-- 05 CHOIX TECHNIQUES -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">choix/compute</span> $ <span class="cmd">eks vs serverless</span><span class="cur"></span></div>
-    <h1 class="title">Compute : pourquoi <span class="ac">EKS</span></h1>
-    <div class="rows">
-      <div class="row no"><div class="opt">Lambda</div><div class="why">WebSocket longues + worker stateful s'orchestrent mal · cold starts.</div></div>
-      <div class="row meh"><div class="opt">ECS / Fargate</div><div class="why">Acceptable, mais moins de contrôle fin : HPA, probes, PodDisruptionBudget.</div></div>
-      <div class="row yes"><div class="opt">EKS</div><div class="why">Scaling fin par profil, portable, standard de marché — l'app a réellement ces besoins.</div></div>
+    <div class="eyebrow"><span class="n">05</span> · Justifications</div>
+    <h1 class="title">Choix techniques justifiés</h1>
+    <div class="grid2" style="align-items:start">
+      <div>
+        <p class="note" style="margin:0 0 12px"><b style="color:var(--ink);font-weight:500">Compute</b> — EKS vs serverless</p>
+        <div class="rows">
+          <div class="row no"><div class="opt">Lambda</div><div class="why">WS longues + worker stateful · cold starts.</div></div>
+          <div class="row meh"><div class="opt">ECS / Fargate</div><div class="why">Moins de contrôle fin (HPA, probes).</div></div>
+          <div class="row yes"><div class="opt">EKS</div><div class="why">Scaling fin par profil · portable.</div></div>
+        </div>
+      </div>
+      <div>
+        <p class="note" style="margin:0 0 12px"><b style="color:var(--ink);font-weight:500">Données</b> — relationnel assumé</p>
+        <div class="card" style="margin-bottom:14px"><h3>RDS Postgres + Drizzle</h3><p>Données relationnelles (unicité, jointures). Drizzle &gt; Prisma : léger, SQL explicite, <b style="color:var(--accent-2)">pas de binaire</b> embarqué.</p></div>
+        <div class="card"><h3>Redis &amp; RabbitMQ in-cluster</h3><p>Coût ↓ et démonstration de la persistance K8s (StatefulSet + PVC).</p></div>
+      </div>
     </div>
-    <div class="callout">Imposé <i>et</i> pertinent : Kubernetes sert nativement les patterns du projet.</div>
   </section>
 
-  <!-- 06 DATA / ORM -->
+  <!-- 06 IaC -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">choix/data</span> $ <span class="cmd">drizzle vs prisma</span><span class="cur"></span></div>
-    <h1 class="title">Données : relationnel assumé</h1>
-    <div class="grid2">
-      <div class="card"><span class="tag">stockage</span><h3>RDS Postgres &gt; S3 / DynamoDB</h3><p>Users / posts / comments / votes : unicité, jointures. S3 = objets, Dynamo = clé-valeur → inadaptés.</p></div>
-      <div class="card amber"><span class="tag">ORM</span><h3>Drizzle &gt; Prisma</h3><p>TypeScript-first, léger, SQL explicite, migrations versionnées — <b>pas de binaire</b> embarqué → images minimales.</p></div>
-    </div>
-    <div class="callout" style="margin-top:16px">Redis &amp; RabbitMQ <i>in-cluster</i> : coût ↓ et démonstration de la persistance K8s (StatefulSet + PVC EBS).</div>
-  </section>
-
-  <!-- 07 IaC -->
-  <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">infra</span> $ <span class="cmd">terraform apply</span><span class="cur"></span></div>
-    <h1 class="title">Infrastructure as Code</h1>
-    <p class="note" style="margin:0 0 12px">100 % Terraform · état distant <span class="mono">S3 + verrou DynamoDB</span> · <b class="mono" style="color:var(--teal-2)">88 ressources</b> en un <span class="mono">apply</span>.</p>
+    <div class="eyebrow"><span class="n">06</span> · Infrastructure as Code</div>
+    <h1 class="title">Tout est codé</h1>
+    <p class="note" style="margin:0 0 16px">100 % Terraform · état distant <span style="font-family:var(--mono);color:var(--accent-2)">S3 + verrou DynamoDB</span> · <b style="color:var(--ink);font-weight:500">88 ressources</b> en un <span style="font-family:var(--mono)">apply</span>.</p>
     <pre class="code"><span class="c"># VPC → EKS → RDS → ECR → Secrets Manager → IAM/OIDC</span>
 <span class="k">module</span> <span class="s">"eks"</span> {
   source          = <span class="s">"terraform-aws-modules/eks/aws"</span>
@@ -256,132 +207,107 @@
   eks_managed_node_groups = { default = { capacity_type = <span class="s">"SPOT"</span> } }
   enable_irsa     = <span class="k">true</span>   <span class="c"># secrets sans clé statique</span>
 }</pre>
-    <div class="callout">Pourquoi Terraform : multi-cloud, modules mûrs, <span class="mono">plan / apply</span> explicite et reproductible.</div>
+    <div class="callout">Terraform : multi-cloud, modules mûrs, <span style="font-family:var(--mono)">plan / apply</span> explicite et reproductible.</div>
   </section>
 
-  <!-- 08 SECURITY -->
-  <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">securité</span> $ <span class="cmd">get secrets -o flow</span><span class="cur"></span></div>
-    <h1 class="title">Zéro secret, zéro root <span class="ac">🔐</span></h1>
-    <div class="figure"><img src="diagrams/secrets.svg" alt="Flux des secrets" style="max-height:340px"></div>
-    <div class="figcap">Secrets Manager → ESO (IRSA) → Secret K8s · CI/CD via OIDC · rôles least-privilege · user IAM dédié (pas root)</div>
+  <!-- 07 SECURITY -->
+  <section class="dgram">
+    <div class="eyebrow"><span class="n">07</span> · Sécurité</div>
+    <h1 class="title">Zéro secret, zéro root</h1>
+    <div class="figure"><img src="diagrams/secrets.svg" alt="Flux des secrets" style="max-height:330px"></div>
+    <div class="figcap">Secrets Manager → ESO (IRSA) → Secret K8s · CI/CD par OIDC · rôles least-privilege · user IAM dédié</div>
   </section>
 
-  <!-- 09 SCALE / RESILIENCE -->
+  <!-- 08 SCALE -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">resilience</span> $ <span class="cmd">get hpa,pdb</span><span class="cur"></span></div>
-    <h1 class="title">Scalabilité &amp; résilience</h1>
-    <div class="grid4" style="margin-top:14px">
-      <div class="card amber"><span class="tag">auto-scaling</span><h3>HPA · CPU 70%</h3><p>gateway &amp; realtime, 2→6 réplicas · metrics-server → <span class="mono" style="color:var(--teal-2)">cpu 11%/70%</span> en live.</p></div>
-      <div class="card"><span class="tag">anti-fragilité</span><h3>Spread + PDB</h3><p>topologySpreadConstraints sur plusieurs nœuds · PodDisruptionBudget.</p></div>
+    <div class="eyebrow"><span class="n">08</span> · Scalabilité &amp; résilience</div>
+    <h1 class="title">Tenir la charge, encaisser les pannes</h1>
+    <div class="grid4">
+      <div class="card"><span class="tag">auto-scaling</span><h3>HPA · CPU 70 %</h3><p>gateway &amp; realtime, 2→6 réplicas (metrics-server).</p></div>
+      <div class="card"><span class="tag">anti-fragilité</span><h3>Spread + PDB</h3><p>Réplicas répartis sur plusieurs nœuds · PodDisruptionBudget.</p></div>
       <div class="card"><span class="tag">état</span><h3>Persistance</h3><p>PVC EBS (Redis/RabbitMQ) · backups RDS · multi-AZ.</p></div>
-      <div class="card amber"><span class="tag">santé</span><h3>Probes</h3><p>liveness · readiness · startup · graceful shutdown.</p></div>
+      <div class="card"><span class="tag">santé</span><h3>Probes</h3><p>liveness · readiness · startup · graceful shutdown.</p></div>
     </div>
   </section>
 
-  <!-- 10 CI/CD -->
+  <!-- 09 CI/CD -->
   <section class="dgram">
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">ci-cd</span> $ <span class="cmd">git push origin main</span><span class="cur"></span></div>
-    <h1 class="title">Du commit au pod, sans main</h1>
-    <div class="figure"><img src="diagrams/cicd.svg" alt="Pipeline CI/CD" style="max-height:300px"></div>
+    <div class="eyebrow"><span class="n">09</span> · CI/CD</div>
+    <h1 class="title">Du commit au pod, sans intervention</h1>
+    <div class="figure"><img src="diagrams/cicd.svg" alt="Pipeline CI/CD" style="max-height:280px"></div>
     <div class="figcap">OIDC (pas de clé AWS) · migration en Job in-cluster (RDS privé) · rollout Kustomize · pipeline vert</div>
   </section>
 
-  <!-- 11 REX DIVIDER -->
+  <!-- 10 REX BUILD -->
   <section>
-    <div class="divider">
-      <div class="pre">$ kubectl logs -f deploy/soutenance --since=cloud-réel</div>
-      <div class="big">Les vraies <span class="ac">galères</span> — et leurs solutions</div>
-    </div>
-  </section>
-
-  <!-- 12 REX BUILD/INFRA -->
-  <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">rex</span> $ <span class="cmd">postmortem --build</span><span class="cur"></span></div>
-    <h1 class="title">REX · build &amp; provisioning</h1>
+    <div class="eyebrow"><span class="n">10</span> · Retour d'expérience</div>
+    <h1 class="title">Les galères du cloud réel</h1>
     <div class="rex">
-      <div class="rexrow"><div class="sym">crash au boot des services</div><div class="cau">esbuild : « dynamic require » des libs CJS bundlées en ESM</div><div class="fix">externaliser les deps npm</div></div>
-      <div class="rexrow"><div class="sym">migration : no pg_hba… no encryption</div><div class="cau">RDS force le TLS</div><div class="fix">?sslmode=require</div></div>
-      <div class="rexrow"><div class="sym">pods Pending indéfiniment</div><div class="cau">EKS 1.31 sans StorageClass par défaut</div><div class="fix">StorageClass gp3 (EBS CSI)</div></div>
+      <div class="rexrow"><div class="sym">crash au boot des services</div><div class="cau">esbuild : « dynamic require » des libs CJS</div><div class="fix">externaliser les deps npm</div></div>
+      <div class="rexrow"><div class="sym">migration : no encryption</div><div class="cau">RDS force le TLS</div><div class="fix">?sslmode=require</div></div>
+      <div class="rexrow"><div class="sym">pods Pending</div><div class="cau">EKS 1.31 sans StorageClass par défaut</div><div class="fix">StorageClass gp3 (EBS CSI)</div></div>
       <div class="rexrow"><div class="sym">RabbitMQ ImagePullBackOff</div><div class="cau">tag Bitnami retiré du registry (2025)</div><div class="fix">image officielle · StatefulSet</div></div>
     </div>
   </section>
 
-  <!-- 13 REX NETWORK BUG (hero) -->
+  <!-- 11 REX NETWORK -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">rex</span> $ <span class="cmd">debug 504 --by isolation</span><span class="cur"></span></div>
-    <h1 class="title">L'enquête : un <span class="ac">504</span> qui n'existait pas en local</h1>
-    <div style="display:grid; grid-template-columns:1.05fr .95fr; gap:26px; align-items:center; flex:1; min-height:0">
-      <div class="steps">
-        <div class="step"><span class="n">01</span><span><span class="m">pods Ready, test interne</span> web:80 → 200 en 8&nbsp;ms ✓</span></div>
-        <div class="step"><span class="n">02</span><span class="m">logs ingress : « upstream timed out »</span></div>
-        <div class="step"><span class="n">03</span><span><b>matrice de joignabilité</b> : gw:3000 ✓ · web:80 ✗ — sur les deux nœuds</span></div>
-        <div class="callout" style="margin-top:14px">Le SG des nœuds n'autorise le cross-node que sur <b style="color:var(--ember-2)">1025-65535</b>. Le web écoute sur <b style="color:var(--red)">80</b> → bloqué.</div>
+    <div class="eyebrow"><span class="n">11</span> · L'enquête</div>
+    <h1 class="title">Un <span class="ac">504</span> qui n'existait pas en local</h1>
+    <div style="display:grid; grid-template-columns:1.05fr .95fr; gap:30px; align-items:center; flex:1; min-height:0">
+      <div>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><span class="m">test interne : web répond en 8 ms ✓ — le pod va bien</span></div>
+          <div class="step"><span class="n">02</span><span class="m">logs ingress : « upstream timed out »</span></div>
+          <div class="step"><span class="n">03</span><span><b style="color:var(--accent-2);font-weight:500">matrice de joignabilité</b> : gw:3000 ✓ · web:80 ✗</span></div>
+        </div>
+        <div class="callout" style="margin-top:24px">Le SG des nœuds n'autorise le cross-node que sur <b>1025-65535</b>. Le web écoute sur <b style="color:var(--bad)">80</b> → bloqué.</div>
       </div>
-      <div class="figure" style="margin:0"><img src="diagrams/netbug.svg" alt="Bug réseau" style="max-height:360px"></div>
+      <div class="figure" style="margin:0"><img src="diagrams/netbug.svg" alt="Bug réseau" style="max-height:340px"></div>
     </div>
-    <div class="figcap">Fix : règle SG port 80 + topologySpread + le smoke teste désormais <span class="mono">/</span> aussi.</div>
+    <div class="figcap">Fix : règle SG port 80 + le smoke teste désormais <span style="font-family:var(--mono)">/</span> aussi.</div>
   </section>
 
-  <!-- 14 LESSONS -->
+  <!-- 12 LESSONS -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">rex</span> $ <span class="cmd">lessons --learned</span><span class="cur"></span></div>
-    <h1 class="title">Ce que j'en retiens</h1>
+    <div class="eyebrow"><span class="n">12</span> · Ce que j'en retiens</div>
+    <h1 class="title">Quatre leçons</h1>
     <ul class="clean">
-      <li>Le <b>« ça marche en local »</b> ne suffit pas : RDS, EKS, les registries ont des comportements propres au cloud.</li>
-      <li>On <b>débugge par isolation</b> (interne vs externe, matrice de joignabilité), pas à l'intuition.</li>
-      <li>Il faut <b>tester ce qu'on déploie vraiment</b> : un smoke partiel donne une fausse confiance.</li>
-      <li>Chaque incident → <b>une ligne d'IaC versionnée + un test</b>. Jamais un patch manuel oublié.</li>
+      <li>Le <b>« ça marche en local »</b> ne suffit pas — RDS, EKS, les registries ont des comportements propres au cloud.</li>
+      <li>On <b>débugge par isolation</b> (interne vs externe), pas à l'intuition.</li>
+      <li>Il faut <b>tester ce qu'on déploie</b> : un smoke partiel donne une fausse confiance.</li>
+      <li>Chaque incident → <b>une ligne d'IaC versionnée + un test</b>, jamais un patch manuel.</li>
     </ul>
   </section>
 
-  <!-- 15 OUTLOOK -->
+  <!-- 13 BILAN + MERCI -->
   <section>
-    <div class="eyebrow"><span class="u">m2cloud</span><span class="h">@eks</span>:<span class="p">~/</span><span class="d">bilan</span> $ <span class="cmd">roadmap --next</span><span class="cur"></span></div>
-    <h1 class="title">Bilan &amp; pistes</h1>
+    <div class="eyebrow"><span class="n">13</span> · Bilan</div>
+    <h1 class="title">Livré, déployé, opéré</h1>
     <div class="grid2">
-      <div class="card"><span class="tag">acquis</span><h3>Livré &amp; opéré</h3><p>Archi justifiée · IaC complète · sécu OIDC/IRSA/ESO sans root · CI/CD vert · déployé sur du vrai cloud.</p></div>
-      <div class="card amber"><span class="tag">pour aller plus loin</span><h3>Industrialisation</h3><p>AWS LB Controller (IP-target) · KEDA (scale sur la queue) · Prometheus/Grafana · GitOps ArgoCD + Karpenter.</p></div>
+      <div class="card"><span class="tag">acquis</span><h3>Sur du vrai cloud</h3><p>Archi justifiée · IaC complète · sécu OIDC/IRSA sans root · CI/CD vert · app en ligne.</p></div>
+      <div class="card"><span class="tag">pour aller plus loin</span><h3>Industrialisation</h3><p>AWS LB Controller (IP-target) · KEDA · Prometheus/Grafana · GitOps ArgoCD.</p></div>
     </div>
-    <div class="callout" style="margin-top:18px">Les endpoints <span class="mono">/metrics</span> sont déjà prêts — l'observabilité est un branchement, pas un chantier.</div>
-  </section>
-
-  <!-- 16 THANKS -->
-  <section>
-    <div class="cover">
-      <div class="kicker">Fin · questions</div>
-      <div class="word">Merci<span class="flame">.</span></div>
-      <div class="runline" style="margin-top:30px">$ git remote -v  →  <span class="ok">github.com/na2sime/m2cloud</span></div>
-      <div class="chips">
-        <span class="chip">● app live</span><span class="chip">CI/CD vert</span><span class="chip">EKS · eu-west-1</span>
-      </div>
-    </div>
+    <div class="callout" style="margin-top:30px"><b>Merci.</b> &nbsp;Questions ?&nbsp; <span style="font-family:var(--mono);color:var(--mut)">github.com/na2sime/m2cloud</span></div>
   </section>
 
 </div></div>
 
-<!-- ops status bar -->
-<div class="statusbar">
-  <div class="seg brand"><span class="dot live"></span>HEARTH</div>
-  <div class="seg"><span class="k">env</span> eu-west-1</div>
-  <div class="seg"><span class="dot ok"></span>EKS 3 nodes · 10 pods</div>
-  <div class="seg"><span class="k">hpa</span> cpu 11%/70%</div>
-  <div class="grow"></div>
-  <div class="seg"><span class="k">status</span> ● 200 OK</div>
-  <div class="seg page"><span id="pager">01 / 16</span></div>
+<div class="footer">
+  <div class="l">m2cloud · hearth</div>
+  <div class="r"><span id="pager">01 / 13</span></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
 <script>
   const deck = new Reveal({
-    width:1280, height:720, margin:0.045, center:false,
-    hash:true, transition:'fade', transitionSpeed:'default',
-    controlsTutorial:false, progress:true, slideNumber:false,
+    width:1280, height:720, margin:0.05, center:false,
+    hash:true, transition:'fade', transitionSpeed:'fast',
+    controlsTutorial:false, progress:true, slideNumber:false, controls:false,
   });
-  deck.initialize().then(()=>{ updatePager(); });
+  deck.initialize().then(updatePager);
   function updatePager(){
-    const i = deck.getIndices().h + 1;
-    const total = deck.getTotalSlides();
+    const i = deck.getIndices().h + 1, total = deck.getTotalSlides();
     const p = document.getElementById('pager');
     if(p) p.textContent = String(i).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
   }

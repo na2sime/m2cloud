@@ -3,14 +3,14 @@
   "themeVariables": {
     "fontFamily": "IBM Plex Mono, ui-monospace, monospace",
     "fontSize": "16px",
-    "lineColor": "#5b6b86",
-    "textColor": "#dbe4f0",
-    "mainBkg": "#10192b",
-    "clusterBkg": "#0b1322",
-    "clusterBorder": "#243049",
-    "titleColor": "#9fb3d1",
-    "edgeLabelBackground": "#0b1220",
-    "nodeBorder": "#5eead4"
+    "lineColor": "#4f5d70",
+    "textColor": "#cdd6e0",
+    "mainBkg": "#131b25",
+    "clusterBkg": "#0d141c",
+    "clusterBorder": "#222c38",
+    "titleColor": "#90a0b4",
+    "edgeLabelBackground": "#0d1117",
+    "nodeBorder": "#7fb0cc"
   },
   "flowchart": { "curve": "basis", "htmlLabels": true, "padding": 16, "nodeSpacing": 55, "rankSpacing": 60 },
   "sequence": { "actorFontFamily": "IBM Plex Mono", "noteFontFamily": "IBM Plex Mono", "messageFontFamily": "IBM Plex Mono" },
